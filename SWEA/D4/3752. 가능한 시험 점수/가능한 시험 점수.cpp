@@ -12,6 +12,7 @@ using namespace std;
 - 조합? -- 부분합 구하기 = 총 부분집합 2^N개 -> 시간초과
 - dp 로 누적합
 - bitset으로 dp 만들면 실행시간 줄일 수 있음
+- dfs 방식 + 방문기록하기
 */
 int N;
 vector<int> v;
@@ -19,6 +20,8 @@ int temp[101]; //현재 선택 보관
 set<int> res;
 int dp[10001]; //최대 합 100*100
 bitset<10001> dp2;
+bool visited[101][10001];
+bool dp3[10001];
 //nCr
 void comb(int n, int r, int t) {
 	if (r == 0) {
@@ -88,6 +91,27 @@ void solve3() {
 	}
 	cout << cnt << "\n";
 }
+bitset<10001> dp4;
+void dfs(int idx, int sum) { //상태: 현재 idx,sum
+	if (idx == N) {
+		dp3[sum] = 1;
+		// dp4 |= (1 << sum); 이건 bitset이 아닌 UINT64나 UINT32 비트마스킹할 때 쓰는 방법, 우항이 int형 이므로!
+		dp4[sum] = 1; // or dp4.set(sum);
+		return;
+	}
+	if (visited[idx][sum]) return;
+	visited[idx][sum] = 1;
+	dfs(idx + 1, sum);
+	dfs(idx + 1, sum + v[idx]);
+}
+
+void solve4() {
+	memset(visited, 0, sizeof(visited));
+	memset(dp3, 0, sizeof(dp3));
+	dp4.reset();
+	dfs(0, 0);
+	cout << dp4.count() << "\n";
+}
 int main(int argc, char** argv)
 {
 	int test_case;
@@ -105,7 +129,7 @@ int main(int argc, char** argv)
 		}
 		sort(v.begin(), v.end());
 		cout << "#" << test_case << " ";
-		solve3();
+		solve4();
 	}
 	return 0;//정상종료시 반드시 0을 리턴해야합니다.
 }
