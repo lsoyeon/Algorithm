@@ -2,19 +2,23 @@
 #include<string>
 #include<vector>
 #include <algorithm>
-#include <string.h>
+#include <unordered_map>
 #include <set>
+#include <string.h>
+#include <bitset>
 using namespace std;
 /*
 학생들이 받을 수 있는 점수 가능한 경우의 수
-조합? -- 부분합 구하기 = 총 부분집합 2^N개 -> 시간초과
-dp 로 누적합
+- 조합? -- 부분합 구하기 = 총 부분집합 2^N개 -> 시간초과
+- dp 로 누적합
+- bitset으로 dp 만들면 실행시간 줄일 수 있음
 */
 int N;
 vector<int> v;
 int temp[101]; //현재 선택 보관
 set<int> res;
 int dp[10001]; //최대 합 100*100
+bitset<10001> dp2;
 //nCr
 void comb(int n, int r, int t) {
 	if (r == 0) {
@@ -58,6 +62,32 @@ void solve() {
 	}
 	cout << cnt << "\n";
 }
+void solve2() {
+	dp2.reset(); dp2[0] = 1;
+	//bitset의 각 bit의 자리가 가능한 점수  3번째bit = 1 --> 3점 가능
+	for (auto score : v) {
+		dp2 |= (dp2 << score); // dp2<<score 하면 score + 기존 점수 꼴
+	}
+	cout << dp2.count() << "\n";
+}
+void solve3() {
+	int cnt = 1;
+	memset(dp, 0, sizeof(dp));
+	dp[0] = 1;
+	int max_sum = 0;
+	for (auto score : v) {
+		for (int i = max_sum; i >= 0; --i) {
+			if (dp[i]) {
+				if (!dp[i + score]) {
+					dp[i + score] = 1;
+					cnt++;
+				}
+			}
+		}
+		max_sum += score;
+	}
+	cout << cnt << "\n";
+}
 int main(int argc, char** argv)
 {
 	int test_case;
@@ -75,7 +105,7 @@ int main(int argc, char** argv)
 		}
 		sort(v.begin(), v.end());
 		cout << "#" << test_case << " ";
-		solve();
+		solve3();
 	}
 	return 0;//정상종료시 반드시 0을 리턴해야합니다.
 }
