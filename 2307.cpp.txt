@@ -1,0 +1,96 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <limits.h>
+#include <stack>
+#include <deque>
+#define MAX 1001
+#define INF INT_MAX
+using namespace std;
+int n, x, m;
+typedef long long ll;
+
+typedef struct EDGE {
+	int vertex;
+	ll weight;
+} edge;
+
+struct cmp {
+	bool operator()(const edge e1, const edge e2){
+		return e1.weight > e2.weight;
+	}
+};
+
+vector<edge> adj[MAX];
+
+bool vt[MAX];
+ll dist[MAX];
+ll res = -1;
+vector<int> par[MAX];
+ll dijkstra(int s, ll dist[], int flag, int v, int p) {
+	priority_queue<edge, vector<edge>, cmp> pq;
+	for (int i = 1; i <= n; i++) {
+		dist[i] = INF;
+		//vt[i] = false;
+	}
+	pq.push({ s, 0 });
+	dist[s] = 0;
+	while (!pq.empty()) {
+		int cur = pq.top().vertex;
+		ll curweight = pq.top().weight;
+		pq.pop();
+		if (curweight > dist[cur]) continue;
+		for (int i = 0; i < adj[cur].size(); i++) {
+			int next = adj[cur].at(i).vertex;
+			if (next == v && cur == p) continue;
+			if (next == p && cur == v) continue;
+			ll newweight = curweight + adj[cur].at(i).weight;
+			if (newweight < dist[next]) {
+				if (flag == 0) {
+					par[next].clear();
+					par[next].push_back(cur);
+				}
+				dist[next] = newweight;
+				pq.push({ next, newweight });
+			}
+			else if (newweight == dist[next] && flag == 0) {
+				par[next].push_back(cur);
+			}
+			//cout << cur << "->" << next << ":" << newweight << "\n";
+		}
+	}
+	if (dist[n] == INF) {
+		return -1;
+	}
+	return dist[n];
+}
+int main(void) {
+	//freopen("input.txt", "r", stdin);
+	ios::sync_with_stdio(0);
+	cin.tie(0);
+	cin >> n >> m;
+	for (int i = 0; i < m; i++) {
+		int x, y, z;
+		cin >> x >> y >> z;
+		adj[x].push_back({ y , z });
+		adj[y].push_back({ x , z });
+	}
+	ll dist[MAX];
+	int min_dis = dijkstra(1, dist, 0, 0, 0);
+	//cout << min_dis << endl;
+	
+	for (int i = n; i > 1;) {
+		ll tmp = dijkstra(1, dist, 1, i, par[i].front());
+		if (tmp == -1) {
+			res = -1;
+			break;
+		}
+		else res = max(res, tmp - min_dis);
+		i = par[i].front();
+	}
+	cout << res;
+	return 0;
+}
+
