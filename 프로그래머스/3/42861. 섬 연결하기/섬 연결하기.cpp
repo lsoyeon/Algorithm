@@ -11,7 +11,7 @@ n개 섬 다리 건설 비용 주어짐
 int par[101];
 int find(int a ){
     if(par[a]==a) return a;
-    return par[a] = find(par[a]);
+    return par[a] = find(par[a]); //find
 }
 void union_set(int a, int b){
     int pa = find(a); 
